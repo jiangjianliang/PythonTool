@@ -6,6 +6,7 @@ Created on 2013-3-14
 import urllib
 import urllib2
 import random
+import Weather
 
 class BBS(object):
     '''
@@ -23,34 +24,29 @@ class BBS(object):
         '''
         Constructor
         '''
-        self.userlist={}
-        self.headers = {}
-        self.randPath=''
+        self.__userlist={}
+        self.__headers = {}
+        self.__headers['User-Agent'] = 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'
+        self.__randPath = '/vd' + str(random.randint(1,5000))
         self.login_data=''
     
     def loadFile(self):
         fileHandler = open('bbs.ini', 'r')
         content = fileHandler.read()
-        self.userlist = content.split('|')
+        self.__userlist = content.split('|')
         fileHandler.close()
     
-    def buildLoginPostField(self):
-        values = {'id':self.userlist[0], 'pw':self.userlist[1], 'lasturl':''}
-        self.login_data = urllib.urlencode(values)
-    
-    def buildLoginCookie(self):
-        self.headers['User-Agent'] = 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'
-    
     def doLogin(self):
-        self.buildLoginCookie()
-        self.buildLoginPostField()
+        values = {'id':self.__userlist[0], 'pw':self.__userlist[1], 'lasturl':''}
+        self.login_data = urllib.urlencode(values)
         login_page = self.fetchLoginPage()
-        self.extractCookieFromPage(login_page)
         
+        self.extractCookieFromPage(login_page)
+    
     def fetchLoginPage(self):
-        self.randPath = '/vd' + str(random.randint(1,5000))
-        login_url = BBS.BBS_URL + self.randPath +BBS.LOGIN_URL
-        login_req = urllib2.Request(login_url, self.login_data, self.headers)
+        login_url = BBS.BBS_URL + self.__randPath +BBS.LOGIN_URL
+        
+        login_req = urllib2.Request(login_url, self.login_data, self.__headers)
         login_res = urllib2.urlopen(login_req)
         login_page = login_res.read()
         print login_page.decode("gb2312")
@@ -65,11 +61,11 @@ class BBS(object):
         arr1 = imp.split('+', 2)
         arr2 = arr1[0].split('N', 2)
         print arr1, arr2
-        self.headers['Cookie'] = "_U_NUM="+ str(int(arr2[0]) + 2)+"; _U_UID="+arr2[1]+"; _U_KEY="+str(int(arr1[1]) - 2)
+        self.__headers['Cookie'] = "_U_NUM="+ str(int(arr2[0]) + 2)+"; _U_UID="+arr2[1]+"; _U_KEY="+str(int(arr1[1]) - 2)
     
     #publish articles with previous cookies
     def publishArticle(self, board, title, content):
-        publish_url = BBS.BBS_URL + self.randPath + BBS.PUBLISH_URL + board
+        publish_url = BBS.BBS_URL + self.__randPath + BBS.PUBLISH_URL + board
         
         publish_value = {}
         publish_value['title']= title.encode('gb2312')
@@ -80,11 +76,28 @@ class BBS(object):
         publish_value['text']= content.encode('gb2312')
         publish_data = urllib.urlencode(publish_value)
         
-        publish_req = urllib2.Request(publish_url, publish_data, self.headers)
+        publish_req = urllib2.Request(publish_url, publish_data, self.__headers)
         publish_res = urllib2.urlopen(publish_req)
         print publish_res.read().decode('gb2312')
+    
+    #send mail to receiver
+    def sendMail(self, receiver, title, content):
+        mail_url = BBS.BBS_URL + self.__randPath + BBS.MAIL_URL
+        
+        mail_value = {}
+        mail_value['title'] = title.encode('gb2312')
+        mail_value['userid'] = receiver
+        mail_value['signature'] = 1
+        mail_value['text'] = content.encode('gb2312')
+        mail_data = urllib.urlencode(mail_value)
+        
+        mail_req = urllib2.Request(mail_url, mail_data, self.__headers)
+        mail_res = urllib2.urlopen(mail_req)
+        print mail_res.read().decode('gb2312')
         
 bbs = BBS()
 bbs.loadFile()
 bbs.doLogin()
-bbs.publishArticle(BBS.TAIZHOU, 'test', 'content-test')
+
+bbs.sendMail('jjlssm', 'hello', test)
+#bbs.publishArticle(BBS.TAIZHOU, 'test', 'content-test')
