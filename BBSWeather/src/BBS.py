@@ -6,7 +6,6 @@ Created on 2013-3-14
 import urllib
 import urllib2
 import random
-import Weather
 
 class BBS(object):
     '''
@@ -95,9 +94,3 @@ class BBS(object):
         mail_res = urllib2.urlopen(mail_req)
         print mail_res.read().decode('gb2312')
         
-bbs = BBS()
-bbs.loadFile()
-bbs.doLogin()
-
-bbs.sendMail('jjlssm', 'hello', test)
-#bbs.publishArticle(BBS.TAIZHOU, 'test', 'content-test')
