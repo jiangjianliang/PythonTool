@@ -16,16 +16,6 @@ MAIL_URL = '/bbssndmail?pid=0&userid='
 
 TAIZHOU = 'TaiZhou'
 
-#fetchFootPage
-#response = urllib2.urlopen(BBS_URL+FOOT_URL)
-#extractFootKeyFromPage
-#page = response.read()
-#print page
-#footkey_begin = page.find('FOOTKEY=')
-#footkey_end = page.find("'</script>", footkey_begin)
-#footkey_cookie = page[footkey_begin+len('FOOTKEY=') : footkey_end]
-#print "footkey ", footkey_cookie
-
 #loadFile
 fileHandler = open('bbs.ini', 'r');
 content = fileHandler.read();
@@ -39,7 +29,6 @@ data = urllib.urlencode(values)
 #buildLoginCookie
 headers = {}
 headers['User-Agent'] = 'Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)'
-#headers['FOOTKEY'] = footkey_cookie
 #doLogin
 #fetchLoginPage
 randPath = '/vd' + str(random.randint(1,5000))
@@ -56,16 +45,16 @@ print "login ", imp
 arr1 = imp.split('+', 2)
 arr2 = arr1[0].split('N', 2)
 print arr1, arr2
+
 #buildPublishCookie
 headers['Cookie'] = "_U_NUM="+ str(int(arr2[0]) + 2)+"; _U_UID="+arr2[1]+"; _U_KEY="+str(int(arr1[1]) - 2)
-#headers['_U_NUM'] = int(arr2[0]) + 2
-#headers['_U_UID'] = arr2[1]
-#headers['_U_KEY'] = int(arr1[1]) - 2
 print headers
+
 #buildPublishUrl
 board = TAIZHOU
 publish_url = BBS_URL + randPath + PUBLISH_URL + board
 print publish_url
+
 #buildPublishPostField
 title = 'title-test'
 content = 'content-test'
@@ -77,6 +66,7 @@ publish_value['signature']=1
 publish_value['autocr']='on'
 publish_value['text']= content.encode('gb2312')
 publish_data = urllib.urlencode(publish_value)
+
 #publishArticle
 publish_req = urllib2.Request(publish_url, publish_data, headers)
 publish_res = urllib2.urlopen(publish_req)
